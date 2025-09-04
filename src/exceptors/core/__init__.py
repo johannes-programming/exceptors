@@ -6,18 +6,22 @@ __all__ = ["Exceptor"]
 
 class Exceptor:
 
-    __slots__ = ("captured",)
+    __slots__ = ("_captured",)
 
     captured: Optional[BaseException]
 
     def __init__(self: Self) -> None:
-        self.captured = None
+        self._captured = None
 
     @contextmanager
     def capture(self: Self, *args: type) -> Generator:
         try:
             yield self
         except args as e:
-            self.captured = e
+            self._captured = e
         else:
-            self.captured = None
+            self._captured = None
+
+    @property
+    def captured(self: Self) -> property:
+        return self._captured
