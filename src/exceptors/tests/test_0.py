@@ -6,64 +6,64 @@ from exceptors.core import Exceptor
 
 class TestExceptor(unittest.TestCase):
     def test_captures_matching_exception(self: Self) -> None:
-        ex = Exceptor()
-        with ex.capture(ValueError):
+        exceptor: Exceptor = Exceptor()
+        with exceptor.capture(ValueError):
             raise ValueError("bad value")
-        self.assertIsNotNone(ex.captured)
-        self.assertIsInstance(ex.captured, ValueError)
-        self.assertEqual(str(ex.captured), "bad value")
+        self.assertIsNotNone(exceptor.captured)
+        self.assertIsInstance(exceptor.captured, ValueError)
+        self.assertEqual(str(exceptor.captured), "bad value")
 
     def test_no_exception_leaves_captured_none(self: Self) -> None:
-        ex = Exceptor()
-        with ex.capture(ValueError):
+        exceptor: Exceptor = Exceptor()
+        with exceptor.capture(ValueError):
             pass
-        self.assertIsNone(ex.captured)
+        self.assertIsNone(exceptor.captured)
 
     def test_captures_one_of_multiple_types(self: Self) -> None:
-        ex = Exceptor()
-        with ex.capture(ValueError, KeyError):
+        exceptor: Exceptor = Exceptor()
+        with exceptor.capture(ValueError, KeyError):
             raise KeyError("missing")
-        self.assertIsNotNone(ex.captured)
-        self.assertIsInstance(ex.captured, KeyError)
+        self.assertIsNotNone(exceptor.captured)
+        self.assertIsInstance(exceptor.captured, KeyError)
         self.assertEqual(
-            str(ex.captured), "'missing'"
+            str(exceptor.captured), "'missing'"
         )  # KeyError stringifies with quotes
 
     def test_non_matching_exception_propagates_and_does_not_set_captured(
         self: Self,
     ) -> None:
-        ex = Exceptor()
+        exceptor: Exceptor = Exceptor()
         with self.assertRaises(ZeroDivisionError):
-            with ex.capture(ValueError, KeyError):
+            with exceptor.capture(ValueError, KeyError):
                 1 / 0  # ZeroDivisionError not in capture set
         # Since the exception propagated out, Exceptor should not have recorded anything
-        self.assertIsNone(ex.captured)
+        self.assertIsNone(exceptor.captured)
 
     def test_reuse_and_reset_semantics(self: Self) -> None:
-        ex = Exceptor()
+        exceptor: Exceptor = Exceptor()
 
         # First, capture an exception
-        with ex.capture(RuntimeError):
+        with exceptor.capture(RuntimeError):
             raise RuntimeError("first")
-        self.assertIsInstance(ex.captured, RuntimeError)
+        self.assertIsInstance(exceptor.captured, RuntimeError)
 
         # Next, a clean block should reset captured to None
-        with ex.capture(RuntimeError):
+        with exceptor.capture(RuntimeError):
             pass
-        self.assertIsNone(ex.captured)
+        self.assertIsNone(exceptor.captured)
 
         # Finally, capture another (different) exception type by passing multiple
-        with ex.capture(RuntimeError, TypeError):
+        with exceptor.capture(RuntimeError, TypeError):
             raise TypeError("second")
-        self.assertIsInstance(ex.captured, TypeError)
+        self.assertIsInstance(exceptor.captured, TypeError)
 
     def test_empty_type_tuple_never_catches(self: Self) -> None:
-        ex = Exceptor()
+        exceptor: Exceptor = Exceptor()
         # Passing no types should behave like catching nothing: exception propagates
         with self.assertRaises(ValueError):
-            with ex.capture():
+            with exceptor.capture():
                 raise ValueError("won't be caught")
-        self.assertIsNone(ex.captured)
+        self.assertIsNone(exceptor.captured)
 
 
 if __name__ == "__main__":
