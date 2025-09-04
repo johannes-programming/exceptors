@@ -15,6 +15,7 @@ class Exceptor:
 
     @contextmanager
     def capture(self: Self, *args: type) -> Generator:
+        "This contextmanager captures exceptions."
         try:
             yield self
         except args as e:
@@ -24,4 +25,5 @@ class Exceptor:
 
     @property
     def captured(self: Self) -> property:
+        "This property stores the captured exception."
         return self._captured
